@@ -41,7 +41,7 @@ function App() {
         <header className="header">
           <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <MessageSquare className="text-accent" style={{ color: 'var(--accent-color)' }} />
-            <h1>StateChat</h1>
+            <h1>Start Chat WebApp</h1>
           </div>
           <div className="connection-status" style={{ fontSize: '0.75rem', color: isConnected ? '#10b981' : '#f43f5e' }}>
             {isConnected ? '● Connected' : '○ Disconnected'}

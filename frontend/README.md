@@ -1,73 +1,88 @@
-# React + TypeScript + Vite
+# Start Chat WebApp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Start Chat WebApp is a modern, real-time chat application built with React, TypeScript, and WebSockets. It features a premium "Glassmorphism" UI and robust connection management.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Real-time Messaging**: Instant message delivery and receipt via WebSockets.
+- **Connection Persistence**: Automatic reconnection logic with exponential backoff (up to 10 retries).
+- **Persistent Identity**: Use of `localStorage` to remember your chosen username across sessions.
+- **Chat History**: Automatically loads previous messages upon connection.
+- **Responsive Design**: A sleek, dark-themed interface that adapts to different screen sizes.
+- **Visual Feedback**: Real-time connection status indicators and error banners.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: [React 19](https://react.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Icons**: [Lucide-react](https://lucide.dev/)
+- **Styling**: Vanilla CSS with modern features (CSS Variables, Flexbox, Backdrop-filter)
 
-## Expanding the ESLint configuration
+## 📂 Project Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+frontend/
+├── src/
+│   ├── components/       # Reusable UI components
+│   │   ├── ChatInput.tsx    # Message typing area and username settings
+│   │   └── MessageItem.tsx   # Individual message display
+│   ├── hooks/            # Custom React hooks
+│   │   └── useChatSocket.ts  # Core WebSocket and state management logic
+│   ├── App.tsx           # Main application entry point and layout
+│   ├── App.css           # Component-specific styles
+│   ├── index.css         # Global styles and design system (Glassmorphism)
+│   └── main.tsx          # React application mounting
+├── public/               # Static assets
+└── vite.config.ts        # Vite configuration
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔌 WebSocket Implementation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The core logic resides in the `useChatSocket` custom hook. It handles:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1.  **Connection Management**: Establishing and closing the WebSocket connection.
+2.  **Reconnection Strategy**: If the connection is lost, it attempts to reconnect 10 times with an increasing delay (exponential backoff).
+3.  **State Synchronization**:
+    -   `history`: Synchronizes the full message history on initial connect.
+    -   `message`: Updates the state with new incoming messages.
+    -   `error`: Captures and displays server-side or connection errors.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (Latest LTS recommended)
+- npm or yarn
+
+### Installation
+
+1.  Navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Running the Development Server
+
+Start the application in development mode with Hot Module Replacement (HMR):
+
+```bash
+npm run dev
 ```
+
+The application will be available at `http://localhost:5173`. Make sure the backend server is running on `http://localhost:8081` for full functionality.
+
+### Building for Production
+
+To create an optimized production build:
+
+```bash
+npm run build
+```
+
+The output will be in the `dist` folder.
+

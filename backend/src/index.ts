@@ -5,7 +5,6 @@ import { randomUUID } from 'crypto';
 const PORT = 8081;
 const wss = new WebSocketServer({ port: PORT });
 
-// In-Memory State: store the last 10 messages using the IMessage interface
 const messageHistory: IMessage[] = [];
 const MAX_HISTORY = 10;
 const MAX_MESSAGE_LENGTH = 500;
@@ -15,7 +14,6 @@ console.log(`WebSocket server is running on ws://localhost:${PORT}`);
 wss.on('connection', (ws: WebSocket) => {
     console.log('New client connected');
 
-    // Connection Hydration: immediately send the entire list of the last 10 messages
     const hydrationData = JSON.stringify({
         type: 'history',
         messages: messageHistory
@@ -26,7 +24,6 @@ wss.on('connection', (ws: WebSocket) => {
         try {
             const parsed = JSON.parse(data.toString());
             
-            // Validate message content
             const content = parsed.content?.trim();
             const username = parsed.user?.trim() || 'Anonymous';
 
@@ -44,7 +41,6 @@ wss.on('connection', (ws: WebSocket) => {
                     return;
                 }
 
-                // Construct the IMessage object
                 const newMessage: IMessage = {
                     id: parsed.id || randomUUID(),
                     user: username,
@@ -52,15 +48,12 @@ wss.on('connection', (ws: WebSocket) => {
                     timestamp: parsed.timestamp || Date.now()
                 };
 
-                // Add the message to the in-memory history
                 messageHistory.push(newMessage);
 
-                // Trim the list if it exceeds 10
                 if (messageHistory.length > MAX_HISTORY) {
                     messageHistory.shift();
                 }
 
-                // Broadcast the new message instantly to all currently connected clients
                 const broadcastData = JSON.stringify({
                     type: 'message',
                     message: newMessage
