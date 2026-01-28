@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { IMessage, IError } from '@shared/types';
 
 const SOCKET_URL = 'ws://localhost:8081';
+const INITIAL_BACKOFF = 1000;
+const MAX_BACKOFF = 30000;
+const MAX_RETRIES = 10;
 
 interface UseChatSocketReturn {
   messages: IMessage[];
@@ -16,14 +19,23 @@ export function useChatSocket(): UseChatSocketReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<IError | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const retryCountRef = useRef(0);
+  const reconnectTimeoutRef = useRef<number | null>(null);
 
   const connect = useCallback(function connectToSocket() {
+    // Clear any pending reconnection timeout
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
     const socket = new WebSocket(SOCKET_URL);
     socketRef.current = socket;
 
     socket.onopen = () => {
       console.log('Connected to WebSocket server');
       setIsConnected(true);
+      retryCountRef.current = 0; // Reset retry count on successful connection
     };
 
     socket.onmessage = (event) => {
@@ -44,10 +56,22 @@ export function useChatSocket(): UseChatSocketReturn {
     socket.onclose = () => {
       console.log('Disconnected from WebSocket server');
       setIsConnected(false);
-      // Attempt to reconnect after 3 seconds
-      setTimeout(() => {
-        connectToSocket();
-      }, 3000);
+
+      if (retryCountRef.current < MAX_RETRIES) {
+        const delay = Math.min(INITIAL_BACKOFF * Math.pow(2, retryCountRef.current), MAX_BACKOFF);
+        console.log(`Attempting to reconnect in ${delay}ms (Attempt ${retryCountRef.current + 1}/${MAX_RETRIES})`);
+        
+        reconnectTimeoutRef.current = window.setTimeout(() => {
+          retryCountRef.current += 1;
+          connectToSocket();
+        }, delay);
+      } else {
+        console.error('Max reconnection retries reached. Please refresh the page to try again.');
+        setError({
+          code: 'CONNECTION_FAILED',
+          message: 'Connection to server lost. Max retries reached.'
+        });
+      }
     };
 
     socket.onerror = (error) => {
@@ -59,6 +83,9 @@ export function useChatSocket(): UseChatSocketReturn {
     connect();
 
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
       if (socketRef.current) {
         socketRef.current.close();
       }
