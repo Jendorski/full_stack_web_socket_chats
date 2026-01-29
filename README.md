@@ -28,6 +28,7 @@ When a user connects to the chat, only the last 10 messages are shown. However, 
 - Docker & Docker Compose (optional, for containerized setup)
 
 ### How to setup
+
 Get started like so:
 ```bash
 git clone https://github.com/Jendorski/full_stack_web_socket_chats.git
