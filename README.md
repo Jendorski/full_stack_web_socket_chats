@@ -18,15 +18,18 @@ When a user connects to the chat, only the last 10 messages are shown. However, 
 - npm
 - Docker & Docker Compose (optional, for containerized setup)
 
-### Docker Setup (Recommended)
-
-To run the entire stack (backend and frontend) using Docker:
+### How to setup
+Get started like so:
+```bash
+git clone https://github.com/Jendorski/full_stack_web_socket_chats.git
+```
+Run the entire stack (backend and frontend) using Docker (Ensure Docker is running on your system):
 
 ```bash
 docker compose up
 ```
 
-To shut down the entire stack on Docker:
+To shut down the entire stack on Docker, open another terminal, as the above command will occupy the current terminal:
 ```bash
 docker compose down
 ```
@@ -40,6 +43,7 @@ cd backend && npm run down
 The frontend will be available at `http://localhost:80` and the backend at `ws://localhost:8081`.
 
 ### Manual Setup
+The manual setup is also available, however, Docker is recommend.
 
 #### 1. Shared Types
 Ensure types are available (though usually handled by local imports):
