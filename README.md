@@ -6,9 +6,18 @@ When a user connects to the chat, only the last 10 messages are shown. However, 
 
 ## Project Structure
 
-- **[backend](procimo_state_chat_websockets/backend)**: Node.js WebSocket server using the `ws` library.
-- **[frontend](procimo_state_chat_websockets/frontend)**: React application (Vite) with a custom `useChatSocket` hook.
+- **[backend](procimo_state_chat_websockets/backend)**: Express server with integrated WebSocket support.
+- **[frontend](procimo_state_chat_websockets/frontend)**: React application (Vite) with real-time state synchronization.
 - **[shared](procimo_state_chat_websockets/shared)**: Shared TypeScript types for consistent data structure.
+
+## Key Features
+
+- **Real-time Communication**: Low-latency chat using WebSockets (`ws`).
+- **Persistent Storage**: Full message history stored in **Redis** (up to 1000 messages).
+- **Instant Hydration**: New connections immediately receive the last 10 messages from an in-memory buffer.
+- **Paginated History API**: REST endpoint `GET /history?page=1&limit=10` for retrieving older messages.
+- **Modular Architecture**: Structured backend using the Service/Controller/Router pattern for scalability.
+- **Containerized**: Fully orchestrated using Docker Compose.
 
 ## Setup Instructions
 
@@ -19,6 +28,7 @@ When a user connects to the chat, only the last 10 messages are shown. However, 
 - Docker & Docker Compose (optional, for containerized setup)
 
 ### How to setup
+
 Get started like so:
 ```bash
 git clone https://github.com/Jendorski/full_stack_web_socket_chats.git
@@ -68,10 +78,16 @@ npm run dev
 
 ## Design Decisions
 
-### Choice of WebSocket Library
-For the backend, I chose the **`ws`** library. It is a lightweight, high-performance WebSocket implementation for Node.js. Unlike higher-level abstractions like Socket.IO, `ws` is simple, follows the standard WebSocket API closely, and has minimal overhead. This makes it perfect for a project where I want to demonstrate low-level state synchronization without the weight of additional features like polling or complex room management.
+### Modular Architecture
+The backend is organized into a **Service/Controller/Router** pattern to ensure a clean separation of concerns:
+- **Services**: Contain business logic (e.g., managing the message buffer in `chatService.ts` or Redis operations in `redis.ts`).
+- **Controllers**: Handle request/response logic and WebSocket event orchestration.
+- **Routes/Handlers**: Define API endpoints using Express Router and initialize WebSocket server lifecycle.
 
-### State Synchronization
-State synchronization for the "last 10 messages" is handled server-side using an in-memory array (`messageHistory`). 
-- **Hydration**: When a new client connects, the server immediately sends the current `messageHistory` array to "hydrate" the client's local state.
-- **Broadcast & Limitation**: As new messages arrive, the server pushes them to the array. If the array exceeds 10 messages, the oldest message is removed using `shift()`. After updating the history, the server broadcasts the new message to all connected clients, ensuring everyone sees the update in real-time while maintaining a consistent "window" of the most recent conversation.
+### Multi-Layered History Management
+To balance performance and data persistence, the app uses a dual-layer approach:
+1. **In-Memory Buffer**: Stores the most recent 10 messages for near-instant hydration of new WebSocket clients.
+2. **Redis Persistence**: All messages are pushed to a Redis List using `RPUSH`. This provides persistent storage that survives server restarts and allows for large-scale history retrieval.
+
+### API Integration
+By transitioning to **Express**, the application now supports standard HTTP features like CORS and JSON parsing, enabling the implementation of a RESTful API alongside the real-time WebSocket communication on a unified port.
