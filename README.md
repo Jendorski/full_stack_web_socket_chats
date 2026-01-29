@@ -77,6 +77,13 @@ npm run dev
 ```
 
 ## Design Decisions
+### Choice of WebSocket Library
+For the backend, I chose the **`ws`** library. It is a lightweight, high-performance WebSocket implementation for Node.js. Unlike higher-level abstractions like Socket.IO, `ws` is simple, follows the standard WebSocket API closely, and has minimal overhead. This makes it perfect for a project where I want to demonstrate low-level state synchronization without the weight of additional features like polling or complex room management.
+
+### State Synchronization
+State synchronization for the "last 10 messages" is handled server-side using an in-memory array (`messageHistory`). 
+- **Hydration**: When a new client connects, the server immediately sends the current `messageHistory` array to "hydrate" the client's local state.
+- **Broadcast & Limitation**: As new messages arrive, the server pushes them to the array. If the array exceeds 10 messages, the oldest message is removed using `shift()`. After updating the history, the server broadcasts the new message to all connected clients, ensuring everyone sees the update in real-time while maintaining a consistent "window" of the most recent conversation.
 
 ### Modular Architecture
 The backend is organized into a **Service/Controller/Router** pattern to ensure a clean separation of concerns:
