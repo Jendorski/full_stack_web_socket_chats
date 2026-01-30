@@ -95,6 +95,3 @@ The backend is organized into a **Service/Controller/Router** pattern to ensure 
 To balance performance and data persistence, the app uses a dual-layer approach:
 1. **In-Memory Buffer**: Stores the most recent 10 messages for near-instant hydration of new WebSocket clients.
 2. **Redis Persistence**: All messages are pushed to a Redis List using `RPUSH`. This provides persistent storage that survives server restarts and allows for large-scale history retrieval.
-
-### API Integration
-By transitioning to **Express**, the application now supports standard HTTP features like CORS and JSON parsing, enabling the implementation of a RESTful API alongside the real-time WebSocket communication on a unified port.
